@@ -1,0 +1,12 @@
+{
+  "name": "assignment_1",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "workspaceFolder": "/app",
+  "extensions": [
+    "ms-python.python",
+    "ms-toolsai.jupyter"
+  ]
+}
