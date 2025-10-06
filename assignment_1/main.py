@@ -75,18 +75,18 @@ for date_str in dates_str_lst:
 
 
 # create bronze features datalake
-bronze_dataset = {'data/features_attributes.csv': "datamart/bronze/features/features_attributes",
-                   'data/feature_clickstream.csv': "datamart/bronze/features/feature_clickstream",
-                     'data/features_financials.csv': "datamart/bronze/features/features_financials"}
+bronze_dataset = {'data/features_attributes.csv': ["datamart/bronze/features/features_attributes", True],
+                   'data/feature_clickstream.csv': ["datamart/bronze/features/feature_clickstream", False],
+                     'data/features_financials.csv': ["datamart/bronze/features/features_financials", True]}
 
-for bronze_directory in bronze_dataset.values():
+for bronze_directory,_ in bronze_dataset.values():
     if not os.path.exists(bronze_directory):
         os.makedirs(bronze_directory)
 
 # run bronze features backfill
-for data_dir, bronze_directory in bronze_dataset.items():
+for data_dir, (bronze_directory, overwrite_table) in bronze_dataset.items():
     for snapshot_date_str in dates_str_lst:
-        utils.data_processing_bronze_table.process_bronze_table_features(data_dir, snapshot_date_str, bronze_directory, spark)
+        utils.data_processing_bronze_table.process_bronze_table_features(data_dir, snapshot_date_str, bronze_directory, spark, overwrite_table=overwrite_table)
         pass
 
 

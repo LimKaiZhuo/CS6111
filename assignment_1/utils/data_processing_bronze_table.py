@@ -34,12 +34,17 @@ def process_bronze_table(snapshot_date_str, bronze_lms_directory, spark):
 
     return df
 
-def process_bronze_table_features(csv_file_path, snapshot_date_str, bronze_directory, spark):
+def process_bronze_table_features(csv_file_path, snapshot_date_str, bronze_directory, spark, overwrite_table=False):
     # prepare arguments
     snapshot_date = datetime.strptime(snapshot_date_str, "%Y-%m-%d")
+    if not overwrite_table:
+        df = spark.read.csv(csv_file_path, header=True, inferSchema=True).filter(col('snapshot_date') == snapshot_date)
+        print(snapshot_date_str + 'row count:', df.count())
+    else:
+        df = spark.read.csv(csv_file_path, header=True, inferSchema=True).filter(col('snapshot_date') <= snapshot_date)
+        print(snapshot_date_str + 'row count:', df.count(), ' . Overwrite table, taking all entries before snapshot date')
+        df = df.withColumn("snapshot_date", F.lit(snapshot_date))  # replace all dates with current snapshot date
 
-    df = spark.read.csv(csv_file_path, header=True, inferSchema=True).filter(col('snapshot_date') == snapshot_date)
-    print(snapshot_date_str + 'row count:', df.count())
 
     # save bronze table to datamart - IRL connect to database to write
     partition_name = "/bronze_" + snapshot_date_str.replace('-','_') + '.csv'
