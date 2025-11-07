@@ -8,7 +8,7 @@ Pipeline steps:
 
 When triggering manually you can override the snapshot month via
 ``dag_run.conf["snapshot_month"]``. The inference task automatically pulls the
-stage-2 model URI (or local model path) from the training results JSON.
+stage-2 model URI from the training results JSON.
 """
 
 from __future__ import annotations
@@ -26,25 +26,11 @@ REPORTS_DIR = PROJECT_ROOT / "reports"
 RESULTS_JSON = PROJECT_ROOT / "outputs" / "results.json"
 
 
-def _resolve_model_uri(results_path: Path, project_root: Path) -> str:
-    """
-    Return the best model URI to pass to the inference pipeline.
-
-    Preference order:
-    1. Absolute path derived from ``stage2_model_path`` if it exists on disk.
-    2. ``stage2_model_artifact_uri`` for MLflow registry URIs.
-    """
+def _load_stage2_model_uri(results_path: Path) -> str:
     try:
         data = json.loads(results_path.read_text())
     except FileNotFoundError:
         return ""
-
-    local_path = data.get("stage2_model_path")
-    if local_path:
-        abs_path = (project_root / local_path).resolve()
-        if abs_path.exists():
-            return str(abs_path)
-
     return data.get("stage2_model_artifact_uri", "")
 
 
@@ -74,7 +60,6 @@ with DAG(
         "datamart_dir": str(PROJECT_ROOT / "datamart"),
         "threshold": 0.5,
         "snapshot_month": "",
-        "model_uri": _resolve_model_uri(RESULTS_JSON, PROJECT_ROOT),
     },
     max_active_runs=1,
 ) as dag:
@@ -82,31 +67,24 @@ with DAG(
     run_inference = BashOperator(
         task_id="run_inference",
         bash_command="""
-        {% set snapshot = dag_run.conf.get('snapshot_month', params.snapshot_month or ds) %}
-        {% set snapshot_token = snapshot | replace('-', '') %}
         cd {{ params.project_root }} && \
         python {{ params.project_root }}/src/pipelines/inference_pipeline.py \
-          --snapshot-date {{ snapshot }} \
+          --snapshot-date {{ params.snapshot_month }} \
           --results-json {{ params.results_json }} \
           --raw-data-root {{ params.data_dir }} \
           --datamart-root {{ params.datamart_dir }} \
           --threshold {{ params.threshold }} \
-{% if params.model_uri %}
-          --model-uri "{{ params.model_uri }}" \
-{% endif %}
-          --output-csv {{ params.reports_dir }}/inference_{{ snapshot_token }}.csv
+          --output-csv {{ params.reports_dir }}/inference_{{ params.snapshot_month|replace('-', '') }}.csv
         """,
     )
 
     evaluate_predictions = BashOperator(
         task_id="evaluate_predictions",
         bash_command="""
-        {% set snapshot = dag_run.conf.get('snapshot_month', params.snapshot_month or ds) %}
-        {% set snapshot_token = snapshot | replace('-', '') %}
         cd {{ params.project_root }} && \
         python {{ params.project_root }}/src/pipelines/evaluation_pipeline.py \
-          --snapshot-date {{ snapshot }} \
-          --inference-csv {{ params.reports_dir }}/inference_{{ snapshot_token }}.csv \
+          --snapshot-date {{ params.snapshot_month }} \
+          --inference-csv {{ params.reports_dir }}/inference_{{ params.snapshot_month|replace('-', '') }}.csv \
           --datamart-root {{ params.datamart_dir }}
         """,
     )

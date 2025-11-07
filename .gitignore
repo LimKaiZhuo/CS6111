@@ -26,6 +26,17 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# datamart
+assignment_1/datamart/
+assignment_1/models/
+assignment_1/models/
+assignment_1/reports/
+lab_5/
+assignment_2/sample_assignments/
+
+assignment_1/mlruns/
+
+
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -205,3 +216,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+kaizhuolim_CS6111_Assignment1_Predicting Loan Default Risk using Medallion Data Pipeline.pdf
+kaizhuolim_CS6111_Assignment1_Predicting Loan Default Risk using Medallion Data Pipeline.pptx
+Assignment_2/Assignment 2.pdf
+Assignment_2/data/feature_clickstream.csv
+Assignment_2/data/features_attributes.csv
+Assignment_2/data/features_financials.csv
+Assignment_2/data/lms_loan_daily.csv
