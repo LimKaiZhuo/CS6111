@@ -71,7 +71,7 @@ def check_alerts(summary_path: Path) -> dict:
             elif auc < (oot_auc * 0.90):  # 10% drop
                 degradation_level = "Alert"
                 message = f"{month_str} AUC ({auc:.4f}) is >10% below OOT AUC ({oot_auc:.4f}). Diagnostic investigation is recommended."
-            elif auc < (oot_auc * 1.2):  # 5% drop
+            elif auc < (oot_auc * 0.95):  # 5% drop
                 degradation_level = "Warning"
                 message = f"{month_str} AUC ({auc:.4f}) is >5% below OOT AUC ({oot_auc:.4f}). Closer observation is advised."
 
