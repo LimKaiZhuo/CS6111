@@ -82,18 +82,23 @@ def create_feature_drift_plots(
             # the outline of the histograms (a step plot) instead of filled bars.
             # First, determine common bins for both distributions.
             combined_data = pd.concat([reference_df[feature].dropna(), current_df[feature].dropna()])
-            bins = np.histogram_bin_edges(combined_data, bins='auto')
+            # Use a try-except block to handle cases where 'auto' binning fails on skewed data.
+            try:
+                auto_bins = np.histogram_bin_edges(combined_data, bins='auto')
+                bins = 'auto' if len(auto_bins) <= 251 else 250
+            except ValueError:
+                bins = 250
 
-            # Calculate histogram values for each dataset using the common bins.
-            ref_hist, _ = np.histogram(reference_df[feature].dropna(), bins=bins, density=True)
-            cur_hist, _ = np.histogram(current_df[feature].dropna(), bins=bins, density=True)
+            # Calculate histogram values. np.histogram returns the bin edges, which we need for plotting.
+            ref_hist, ref_bins = np.histogram(reference_df[feature].dropna(), bins=bins, density=True)
+            cur_hist, cur_bins = np.histogram(current_df[feature].dropna(), bins=bins, density=True)
 
             # Create the step plot traces.
             fig = go.Figure()
             
             # Current: Red filled area with transparency and no outline
             fig.add_trace(go.Scatter(
-                x=bins, y=cur_hist,
+                x=cur_bins, y=cur_hist,
                 fill='tozeroy',
                 mode='lines',
                 line_shape='hv',
@@ -103,7 +108,7 @@ def create_feature_drift_plots(
             ))
 
             # Reference: Smooth blue line, no fill
-            bin_centers = (bins[:-1] + bins[1:]) / 2
+            bin_centers = (ref_bins[:-1] + ref_bins[1:]) / 2
             fig.add_trace(go.Scatter(x=bin_centers, y=ref_hist, mode='lines', line_shape='spline', name='Reference', line=dict(color='blue')))
 
             fig.update_layout(
