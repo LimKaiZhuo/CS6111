@@ -1,0 +1,13 @@
+services:
+  jupyter:
+    build: .
+    container_name: jupyter_lab_assignment
+    ports:
+      - "8888:8888"
+      - "5000:5000"
+    volumes:
+      - ../../:/app
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - PYTHONPATH=/app
+    command: ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--notebook-dir=/app", "--ServerApp.token=''", "--ServerApp.disable_check_xsrf=True"]

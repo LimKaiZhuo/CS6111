@@ -27,14 +27,17 @@ share/python-wheels/
 MANIFEST
 
 # datamart
-assignment_1/datamart/
-assignment_1/models/
-assignment_1/models/
-assignment_1/reports/
+assignment/datamart/
+assignment/models/
+assignment/models/
+assignment/outputs/
+assignment/reports/
 lab_5/
+lab_1/
+lab_2/
+assignment_2/
 assignment_2/sample_assignments/
-
-assignment_1/mlruns/
+assignment/mlruns/
 
 
 # PyInstaller
@@ -216,8 +219,6 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
-kaizhuolim_CS6111_Assignment1_Predicting Loan Default Risk using Medallion Data Pipeline.pdf
-kaizhuolim_CS6111_Assignment1_Predicting Loan Default Risk using Medallion Data Pipeline.pptx
 Assignment_2/Assignment 2.pdf
 Assignment_2/data/feature_clickstream.csv
 Assignment_2/data/features_attributes.csv
